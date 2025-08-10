@@ -41,8 +41,8 @@ Siga os passos abaixo para ter a aplicação rodando localmente.
 ### 1. Clonar o Repositório
 
 ```bash
-git clone [https://github.com/](https://github.com/)[SEU-NOME-DE-USUARIO]/[NOME-DO-SEU-REPOSITORIO].git
-cd [NOME-DO-SEU-REPOSITORIO]
+git clone [https://github.com/](https://github.com/)jlpontes/creditFraud-prediction.git
+cd creditFraud-prediction
 ```
 
 ### 2. Criar e Instalar as Dependências
