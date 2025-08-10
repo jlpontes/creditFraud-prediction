@@ -1,24 +1,25 @@
-# main.py3
+# main.py
+
 import joblib
 import pandas as pd
 from fastapi import FastAPI
 from pydantic import BaseModel
 import uvicorn
 
-# 1. Inicializar o objeto da API
-#título e uma versão para a nossa API
+# 1. Initialize the FastAPI app
+# We provide a title and a version for our API
 app = FastAPI(
-    title="API de Detecção de Fraude",
+    title="Fraud Detection API",
     version="1.0",
-    description="Uma API para detectar fraudes em transações financeiras usando um modelo de Random Forest."
+    description="An API to detect fraud in financial transactions using a Random Forest model."
 )
 
-# 2. Carregar nosso modelo treinado
-
+# 2. Load our trained model
+# This happens only once when the API starts up.
 model = joblib.load('fraud_model.joblib')
 
-# 3. Definir o formato dos dados de entrada com Pydantic
-# Isso garante que qualquer dado enviado para a API terá o formato correto.
+# 3. Define the input data format with Pydantic
+# This ensures that any data sent to the API will have the correct format and data types.
 class Transaction(BaseModel):
     V1: float
     V2: float
@@ -51,32 +52,32 @@ class Transaction(BaseModel):
     scaled_amount: float
     scaled_time: float
 
-# 4. Criar o endpoint de previsão
-# @app.post("/predict") diz ao FastAPI para criar um endpoint que aceita requisições do tipo POST
+# 4. Create the prediction endpoint
+# @app.post("/predict") tells FastAPI to create an endpoint that accepts POST requests
 @app.post("/predict")
 def predict_fraud(transaction: Transaction):
     """
-    Recebe os dados de uma transação, faz a previsão usando o modelo treinado e retorna a classificação.
-    - **transaction**: Um objeto JSON com os dados da transação.
+    Receives transaction data, makes a prediction using the trained model, and returns the classification.
+    - **transaction**: A JSON object with the transaction data.
     """
-    # Converter os dados recebidos para um DataFrame do Pandas, pois o modelo foi treinado com ele.
+    # Convert the received data into a Pandas DataFrame, as the model was trained with it.
     input_data = pd.DataFrame([transaction.dict()])
     
-    # Fazer a previsão
+    # Make the prediction
     prediction = model.predict(input_data)[0]
     
-    # Obter a probabilidade da previsão
+    # Get the prediction probability
     prediction_proba = model.predict_proba(input_data)[0]
     
-    # Definir o resultado
-    is_fraud = bool(prediction) # Converte o resultado (0 ou 1) para booleano (False ou True)
+    # Define the result
+    is_fraud = bool(prediction) # Converts the result (0 or 1) to boolean (False or True)
     
-    # Retornar o resultado em formato JSON
+    # Return the result in JSON format
     return {
         "is_fraud": is_fraud,
         "fraud_probability": f"{prediction_proba[1]*100:.2f}%"
     }
 
-# Este bloco permite rodar a API diretamente com "python main.py", embora uvicorn seja o recomendado
+# This block allows running the API directly with "python main.py", although uvicorn is recommended
 if __name__ == "__main__":
     uvicorn.run(app, host="127.0.0.1", port=8000)
